@@ -16,9 +16,3 @@
    npm install
    npm run dev
    ```
-
-## Features implemented
-- User & Captain Auth (JWT, Cookies)
-- Registration & Login
-- Ride Calculation (Fare, Distance via Google Maps)
-- Project Structure (Modules, Services, Controllers)

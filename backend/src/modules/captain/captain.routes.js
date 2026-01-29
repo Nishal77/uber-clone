@@ -27,4 +27,6 @@ router.get('/profile', authMiddleware.authCaptain, captainController.getCaptainP
 
 router.get('/logout', authMiddleware.authCaptain, captainController.logoutCaptain)
 
+router.patch('/toggle-availability', authMiddleware.authCaptain, captainController.toggleAvailability)
+
 module.exports = router;

@@ -1,117 +1,29 @@
 import React, { useState, useEffect } from 'react'
-import { LoadScript, GoogleMap, Marker } from '@react-google-maps/api'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 
-const containerStyle = {
-    width: '100%',
-    height: '100%',
-};
+// Fix for default marker icon issues in React Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
 
-const center = {
-    lat: -3.745,
-    lng: -38.523
-};
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
-const options = {
-    zoomControl: false,
-    mapTypeControl: false,
-    fullscreenControl: false,
-    streetViewControl: false,
-    styles: [
-        {
-            "featureType": "all",
-            "elementType": "geometry.fill",
-            "stylers": [ { "weight": "2.00" } ]
-        },
-        {
-            "featureType": "all",
-            "elementType": "geometry.stroke",
-            "stylers": [ { "color": "#9c9c9c" } ]
-        },
-        {
-            "featureType": "all",
-            "elementType": "labels.text",
-            "stylers": [ { "visibility": "on" } ]
-        },
-        {
-            "featureType": "landscape",
-            "elementType": "all",
-            "stylers": [ { "color": "#f2f2f2" } ]
-        },
-        {
-            "featureType": "landscape",
-            "elementType": "geometry.fill",
-            "stylers": [ { "color": "#ffffff" } ]
-        },
-        {
-            "featureType": "landscape.man_made",
-            "elementType": "geometry.fill",
-            "stylers": [ { "color": "#ffffff" } ]
-        },
-        {
-            "featureType": "poi",
-            "elementType": "all",
-            "stylers": [ { "visibility": "off" } ]
-        },
-        {
-            "featureType": "road",
-            "elementType": "all",
-            "stylers": [ { "saturation": -100 }, { "lightness": 45 } ]
-        },
-        {
-            "featureType": "road",
-            "elementType": "geometry.fill",
-            "stylers": [ { "color": "#eeeeee" } ]
-        },
-        {
-            "featureType": "road",
-            "elementType": "labels.text.fill",
-            "stylers": [ { "color": "#7b7b7b" } ]
-        },
-        {
-            "featureType": "road",
-            "elementType": "labels.text.stroke",
-            "stylers": [ { "color": "#ffffff" } ]
-        },
-        {
-            "featureType": "road.highway",
-            "elementType": "all",
-            "stylers": [ { "visibility": "simplified" } ]
-        },
-        {
-            "featureType": "road.arterial",
-            "elementType": "labels.icon",
-            "stylers": [ { "visibility": "off" } ]
-        },
-        {
-            "featureType": "transit",
-            "elementType": "all",
-            "stylers": [ { "visibility": "off" } ]
-        },
-        {
-            "featureType": "water",
-            "elementType": "all",
-            "stylers": [ { "color": "#46bcec" }, { "visibility": "on" } ]
-        },
-        {
-            "featureType": "water",
-            "elementType": "geometry.fill",
-            "stylers": [ { "color": "#c8d7d4" } ]
-        },
-        {
-            "featureType": "water",
-            "elementType": "labels.text.fill",
-            "stylers": [ { "color": "#070707" } ]
-        },
-        {
-            "featureType": "water",
-            "elementType": "labels.text.stroke",
-            "stylers": [ { "color": "#ffffff" } ]
-        }
-    ]
+// Component to update map center when position changes
+function ChangeView({ center }) {
+    const map = useMap();
+    map.setView(center);
+    return null;
 }
 
 const LiveTracking = () => {
-    const [ currentPosition, setCurrentPosition ] = useState(center);
+    const [ currentPosition, setCurrentPosition ] = useState({
+        lat: -3.745,
+        lng: -38.523
+    });
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition((position) => {
@@ -133,37 +45,23 @@ const LiveTracking = () => {
         return () => navigator.geolocation.clearWatch(watchId);
     }, []);
 
-    useEffect(() => {
-        const updatePosition = () => {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const { latitude, longitude } = position.coords;
-
-                console.log('Position updated:', latitude, longitude);
-
-                setCurrentPosition({
-                    lat: latitude,
-                    lng: longitude
-                });
-            });
-        };
-
-        updatePosition(); // Initial update
-
-        const intervalId = setInterval(updatePosition, 1000); // Update every 10 seconds
-
-    }, [])
-
     return (
-        <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-            <GoogleMap
-                mapContainerStyle={containerStyle}
-                center={currentPosition}
-                zoom={15}
-                options={options}
-            >
-                <Marker position={currentPosition} />
-            </GoogleMap>
-        </LoadScript>
+        <MapContainer
+            center={currentPosition}
+            zoom={15}
+            style={{ width: '100%', height: '100%' }}
+        >
+            <ChangeView center={currentPosition} />
+            <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            />
+            <Marker position={currentPosition}>
+                {/* <Popup>
+                    You are here
+                </Popup> */}
+            </Marker>
+        </MapContainer>
     )
 }
 

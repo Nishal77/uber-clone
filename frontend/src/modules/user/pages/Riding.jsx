@@ -28,13 +28,11 @@ const Riding = () => {
             setRideStatus('completed')
             setShowCompletionScreen(true)
             
-            // Auto-redirect to home after 4 seconds
             setTimeout(() => {
                 navigate('/home')
             }, 4000)
         }
 
-        // Listen for any ride updates
         const handleRideUpdate = (data) => {
             console.log('📱 Ride update received:', data)
             setRide(data)
@@ -54,7 +52,6 @@ const Riding = () => {
         return null
     }
 
-    // Get status info based on current ride status
     const getStatusInfo = () => {
         switch (rideStatus) {
             case 'accepted':
@@ -62,7 +59,6 @@ const Riding = () => {
                     text: 'Driver Assigned',
                     subtext: 'Driver is on the way to pick you up',
                     icon: 'ri-car-line',
-                    color: 'blue',
                     progress: 33
                 }
             case 'ongoing':
@@ -70,7 +66,6 @@ const Riding = () => {
                     text: 'Trip in Progress',
                     subtext: 'Heading to your destination',
                     icon: 'ri-navigation-line',
-                    color: 'green',
                     progress: 66
                 }
             case 'completed':
@@ -78,7 +73,6 @@ const Riding = () => {
                     text: 'Trip Completed',
                     subtext: 'You have reached your destination',
                     icon: 'ri-checkbox-circle-line',
-                    color: 'green',
                     progress: 100
                 }
             default:
@@ -86,7 +80,6 @@ const Riding = () => {
                     text: 'Ride Status',
                     subtext: 'Please wait...',
                     icon: 'ri-time-line',
-                    color: 'gray',
                     progress: 0
                 }
         }
@@ -97,51 +90,49 @@ const Riding = () => {
     // Completion screen
     if (showCompletionScreen) {
         return (
-            <div className='h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4'>
+            <div className='min-h-screen flex items-center justify-center bg-gray-50 p-6'>
                 <div className='text-center max-w-md w-full'>
-                    <div className='relative'>
-                        <div className='w-32 h-32 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce shadow-2xl'>
-                            <i className="ri-checkbox-circle-fill text-white text-7xl"></i>
-                        </div>
-                        <div className='absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-green-400 rounded-full opacity-50 animate-ping'></div>
+                    {/* Success Icon */}
+                    <div className='w-28 h-28 bg-green-600 rounded-3xl flex items-center justify-center mx-auto mb-8 border-4 border-green-700'>
+                        <i className="ri-checkbox-circle-fill text-white text-6xl"></i>
                     </div>
                     
-                    <h2 className='text-4xl font-bold text-gray-900 mb-3'>Trip Completed!</h2>
-                    <p className='text-lg text-gray-600 mb-8'>Thank you for riding with us</p>
+                    <h2 className='text-4xl font-bold text-gray-900 mb-2 tracking-tight'>Trip Completed</h2>
+                    <p className='text-gray-600 mb-10'>Thank you for choosing us</p>
                     
-                    <div className='bg-white rounded-3xl p-8 shadow-2xl mb-6'>
-                        <div className='flex items-center justify-between mb-4'>
-                            <div className='text-left'>
-                                <p className='text-sm text-gray-500 mb-1'>Total Fare</p>
-                                <p className='text-5xl font-bold text-green-600'>₹{ride.fare}</p>
-                            </div>
-                            <div className='w-16 h-16 bg-green-100 rounded-full flex items-center justify-center'>
-                                <i className="ri-money-rupee-circle-fill text-green-600 text-3xl"></i>
-                            </div>
+                    {/* Fare Display */}
+                    <div className='bg-white rounded-3xl p-8 mb-6 border-2 border-gray-200'>
+                        <div className='mb-6'>
+                            <p className='text-sm text-gray-600 mb-2 uppercase tracking-wider font-bold'>Total Fare</p>
+                            <p className='text-6xl font-bold text-gray-900'>₹{ride.fare}</p>
                         </div>
-                        <div className='pt-4 border-t border-gray-200'>
-                            <div className='flex items-center justify-between text-sm'>
-                                <span className='text-gray-600'>Payment Method</span>
-                                <span className='font-semibold text-gray-900'>
-                                    {ride.paymentMethod === 'cash' ? '💵 Cash' : '💳 Paid Online'}
+                        
+                        <div className='pt-6 border-t-2 border-gray-200'>
+                            <div className='flex items-center justify-between'>
+                                <span className='text-sm text-gray-600 font-medium'>Payment Method</span>
+                                <span className='font-bold text-gray-900'>
+                                    {ride.paymentMethod === 'cash' ? 'Cash' : 'Card'}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Rating section (placeholder) */}
-                    <div className='bg-white rounded-3xl p-6 shadow-xl'>
-                        <p className='text-sm text-gray-600 mb-3'>How was your ride?</p>
-                        <div className='flex justify-center gap-2 mb-2'>
+                    {/* Rating */}
+                    <div className='bg-white rounded-3xl p-6 border-2 border-gray-200'>
+                        <p className='text-sm text-gray-600 mb-4 font-medium'>Rate Your Experience</p>
+                        <div className='flex justify-center gap-3'>
                             {[1, 2, 3, 4, 5].map((star) => (
-                                <button key={star} className='hover:scale-110 transition-transform'>
-                                    <i className="ri-star-fill text-yellow-400 text-3xl"></i>
+                                <button 
+                                    key={star} 
+                                    className='hover:scale-110 transition-transform active:scale-95'
+                                >
+                                    <i className="ri-star-line text-gray-300 hover:text-orange-500 text-4xl"></i>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    <p className='text-sm text-gray-500 mt-6'>Redirecting to home...</p>
+                    <p className='text-sm text-gray-400 mt-8'>Redirecting to home...</p>
                 </div>
             </div>
         )
@@ -149,29 +140,18 @@ const Riding = () => {
 
     // Active ride screen
     return (
-        <div className='h-screen flex flex-col bg-white'>
-            {/* Header */}
-            <div className='flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 shadow-sm z-10'>
-                <div className='flex items-center justify-between'>
+        <div className='h-screen flex flex-col bg-gray-50'>
+            {/* Clean Header */}
+            <div className='flex-shrink-0 bg-white border-b-2 border-gray-200 px-6 py-4 z-10'>
+                <div className='flex items-center justify-between max-w-md mx-auto'>
                     <div className='flex items-center gap-3'>
-                        <img className='h-6' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="Uber" />
+                        <img className='h-5' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="Uber" />
                     </div>
-                    <div className='flex items-center gap-2'>
-                        <div className={`px-3 py-1 rounded-full ${
-                            statusInfo.color === 'green' ? 'bg-green-50' : 
-                            statusInfo.color === 'blue' ? 'bg-blue-50' : 'bg-gray-50'
-                        }`}>
-                            <span className={`font-semibold text-xs flex items-center gap-1 ${
-                                statusInfo.color === 'green' ? 'text-green-700' : 
-                                statusInfo.color === 'blue' ? 'text-blue-700' : 'text-gray-700'
-                            }`}>
-                                <span className={`w-2 h-2 rounded-full animate-pulse ${
-                                    statusInfo.color === 'green' ? 'bg-green-500' : 
-                                    statusInfo.color === 'blue' ? 'bg-blue-500' : 'bg-gray-500'
-                                }`}></span>
-                                {statusInfo.text}
-                            </span>
-                        </div>
+                    <div className='px-4 py-2 bg-blue-600 rounded-xl'>
+                        <span className='font-bold text-xs text-white flex items-center gap-2'>
+                            <span className='w-2 h-2 rounded-full bg-white animate-pulse'></span>
+                            {statusInfo.text}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -180,50 +160,42 @@ const Riding = () => {
             <div className='flex-1 relative'>
                 <LiveTracking />
 
-                {/* Status Card Overlay */}
-                <div className='absolute top-4 left-4 right-4 z-[1000]'>
-                    <div className='bg-white rounded-2xl shadow-2xl p-4 border-2 border-gray-100'>
-                        <div className='flex items-center gap-3 mb-3'>
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                statusInfo.color === 'green' ? 'bg-green-100' : 
-                                statusInfo.color === 'blue' ? 'bg-blue-100' : 'bg-gray-100'
-                            }`}>
-                                <i className={`${statusInfo.icon} text-2xl ${
-                                    statusInfo.color === 'green' ? 'text-green-600' : 
-                                    statusInfo.color === 'blue' ? 'text-blue-600' : 'text-gray-600'
-                                }`}></i>
+                {/* Status Card */}
+                <div className='absolute top-6 left-4 right-4 z-[1000]'>
+                    <div className='bg-white rounded-3xl p-5 border-2 border-gray-200 max-w-md mx-auto'>
+                        <div className='flex items-center gap-4 mb-4'>
+                            <div className='w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center'>
+                                <i className={`${statusInfo.icon} text-2xl text-white`}></i>
                             </div>
                             <div className='flex-1'>
-                                <p className='font-bold text-gray-900'>{statusInfo.text}</p>
-                                <p className='text-xs text-gray-600'>{statusInfo.subtext}</p>
+                                <p className='font-bold text-gray-900 text-lg'>{statusInfo.text}</p>
+                                <p className='text-sm text-gray-600'>{statusInfo.subtext}</p>
                             </div>
                             {rideStatus !== 'completed' && (
                                 <div className='text-right'>
-                                    <p className='text-xs text-gray-500'>ETA</p>
-                                    <p className='font-bold text-blue-600'>~5 min</p>
+                                    <p className='text-xs text-gray-500 uppercase tracking-wider mb-1 font-bold'>ETA</p>
+                                    <p className='font-bold text-gray-900 text-lg'>5 min</p>
                                 </div>
                             )}
                         </div>
 
                         {/* Progress Bar */}
-                        <div className='relative h-2 bg-gray-200 rounded-full overflow-hidden'>
+                        <div className='relative h-2 bg-gray-200 rounded-full overflow-hidden mb-3'>
                             <div 
-                                className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ${
-                                    statusInfo.color === 'green' ? 'bg-green-500' : 'bg-blue-500'
-                                }`}
+                                className='absolute top-0 left-0 h-full bg-blue-600 rounded-full transition-all duration-1000'
                                 style={{ width: `${statusInfo.progress}%` }}
                             ></div>
                         </div>
 
-                        {/* Progress Steps */}
-                        <div className='flex justify-between mt-2 text-xs'>
-                            <span className={`${rideStatus === 'accepted' || rideStatus === 'ongoing' || rideStatus === 'completed' ? 'text-blue-600 font-semibold' : 'text-gray-400'}`}>
+                        {/* Progress Labels */}
+                        <div className='flex justify-between text-[11px] font-medium'>
+                            <span className={rideStatus === 'accepted' || rideStatus === 'ongoing' || rideStatus === 'completed' ? 'text-blue-600 font-bold' : 'text-gray-400'}>
                                 Assigned
                             </span>
-                            <span className={`${rideStatus === 'ongoing' || rideStatus === 'completed' ? 'text-green-600 font-semibold' : 'text-gray-400'}`}>
+                            <span className={rideStatus === 'ongoing' || rideStatus === 'completed' ? 'text-blue-600 font-bold' : 'text-gray-400'}>
                                 In Progress
                             </span>
-                            <span className={`${rideStatus === 'completed' ? 'text-green-600 font-semibold' : 'text-gray-400'}`}>
+                            <span className={rideStatus === 'completed' ? 'text-green-600 font-bold' : 'text-gray-400'}>
                                 Completed
                             </span>
                         </div>
@@ -231,90 +203,78 @@ const Riding = () => {
                 </div>
             </div>
 
-            {/* Bottom Panel */}
-            <div className='flex-shrink-0 bg-white border-t border-gray-200 px-4 py-5 shadow-2xl'>
+            {/* Bottom Panel - Clean */}
+            <div className='flex-shrink-0 bg-white border-t-2 border-gray-200 px-4 py-6'>
                 <div className='max-w-md mx-auto space-y-4'>
-                    {/* Driver Info */}
-                    <div className='flex items-center justify-between bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-2xl border border-blue-100'>
-                        <div className='flex items-center gap-3'>
-                            <div className='w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg'>
+                    {/* Driver Card - Flat */}
+                    <div className='bg-gray-50 rounded-3xl p-5 border-2 border-gray-200'>
+                        <div className='flex items-center gap-4 mb-4'>
+                            <div className='w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl border-2 border-blue-700'>
                                 {ride.captain?.fullname?.firstname?.[0] || 'D'}
                             </div>
-                            <div>
-                                <p className='font-bold text-gray-900'>
+                            <div className='flex-1'>
+                                <p className='font-bold text-gray-900 text-lg mb-0.5'>
                                     {ride.captain?.fullname?.firstname || 'Driver'} {ride.captain?.fullname?.lastname || ''}
                                 </p>
-                                <p className='text-xs text-gray-600'>
+                                <p className='text-sm text-gray-600 mb-1'>
                                     {ride.captain?.vehicle?.plate || 'Vehicle'} • {ride.captain?.vehicle?.vehicleType || 'Car'}
                                 </p>
-                                <div className='flex items-center gap-1 mt-1'>
-                                    <i className="ri-star-fill text-yellow-500 text-xs"></i>
-                                    <span className='text-xs font-semibold text-gray-700'>4.9</span>
+                                <div className='flex items-center gap-1.5 px-2 py-1 bg-orange-50 rounded-lg border border-orange-200 inline-flex'>
+                                    <i className="ri-star-fill text-orange-500 text-sm"></i>
+                                    <span className='text-sm font-bold text-orange-900'>4.9</span>
+                                </div>
+                            </div>
+                            <a 
+                                href={`tel:${ride.captain?.phone || ''}`}
+                                className='w-14 h-14 bg-green-600 hover:bg-green-700 active:bg-green-800 rounded-2xl flex items-center justify-center text-white transition-colors'
+                            >
+                                <i className="ri-phone-line text-xl"></i>
+                            </a>
+                        </div>
+
+                        {/* Route - Clean */}
+                        <div className='bg-white rounded-2xl p-4 border-2 border-gray-200'>
+                            <div className='flex items-start gap-4'>
+                                <div className='flex flex-col items-center gap-1.5 pt-1'>
+                                    <div className='w-4 h-4 bg-green-600 rounded-full'></div>
+                                    <div className='w-0.5 h-12 bg-gray-300'></div>
+                                    <div className='w-4 h-4 bg-orange-500 rounded-full'></div>
+                                </div>
+                                <div className='flex-1 space-y-6'>
+                                    <div>
+                                        <p className='text-xs text-green-600 font-bold mb-1.5 uppercase tracking-wider'>Pickup</p>
+                                        <p className='text-sm font-semibold text-gray-900 line-clamp-1'>{ride.pickup}</p>
+                                    </div>
+                                    <div>
+                                        <p className='text-xs text-orange-600 font-bold mb-1.5 uppercase tracking-wider'>Destination</p>
+                                        <p className='text-sm font-semibold text-gray-900 line-clamp-1'>{ride.destination}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <a 
-                            href={`tel:${ride.captain?.phone || ''}`}
-                            className='w-12 h-12 bg-green-500 hover:bg-green-600 active:scale-95 rounded-full flex items-center justify-center text-white shadow-lg transition-all'
-                        >
-                            <i className="ri-phone-line text-xl"></i>
-                        </a>
                     </div>
 
-                    {/* Trip Route */}
-                    <div className='bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-200'>
-                        <div className='flex items-start gap-3'>
-                            <div className='flex flex-col items-center gap-1 mt-1'>
-                                <div className='w-3 h-3 bg-green-500 rounded-full ring-4 ring-green-100'></div>
-                                <div className='w-0.5 h-10 bg-gradient-to-b from-green-300 to-red-300'></div>
-                                <div className='w-3 h-3 bg-red-500 rounded-full ring-4 ring-red-100'></div>
-                            </div>
-                            <div className='flex-1 space-y-5'>
-                                <div>
-                                    <p className='text-xs text-gray-500 mb-1'>Pickup</p>
-                                    <p className='text-sm font-semibold text-gray-900 line-clamp-1'>{ride.pickup}</p>
+                    {/* Fare - Clean */}
+                    <div className='bg-blue-600 rounded-3xl p-6 border-2 border-blue-700'>
+                        <div className='flex items-center justify-between'>
+                            <div className='flex items-center gap-4'>
+                                <div className='w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center'>
+                                    <i className={`${ride.paymentMethod === 'cash' ? 'ri-money-rupee-circle-line' : 'ri-bank-card-line'} text-white text-2xl`}></i>
                                 </div>
                                 <div>
-                                    <p className='text-xs text-gray-500 mb-1'>Destination</p>
-                                    <p className='text-sm font-semibold text-gray-900 line-clamp-1'>{ride.destination}</p>
+                                    <p className='text-xs text-blue-200 uppercase tracking-wider mb-1 font-bold'>Trip Fare</p>
+                                    <p className='font-bold text-white text-2xl'>₹{ride.fare}</p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Payment Info */}
-                    <div className='flex items-center justify-between bg-white border-2 border-gray-200 p-4 rounded-2xl'>
-                        <div className='flex items-center gap-3'>
-                            <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-                                <i className={`${ride.paymentMethod === 'cash' ? 'ri-money-rupee-circle-line' : 'ri-bank-card-line'} text-blue-600 text-xl`}></i>
                             </div>
                             <div>
-                                <p className='text-xs text-gray-500'>Trip Fare</p>
-                                <p className='font-bold text-gray-900'>₹{ride.fare}</p>
+                                <span className='text-sm px-4 py-2 rounded-xl font-bold bg-white text-blue-600 border-2 border-blue-700'>
+                                    {ride.paymentMethod === 'cash' ? 'Cash' : 'Paid'}
+                                </span>
                             </div>
-                        </div>
-                        <div className='text-right'>
-                            <span className={`text-xs px-3 py-1.5 rounded-lg font-semibold ${
-                                ride.paymentMethod === 'cash' 
-                                    ? 'bg-green-100 text-green-700 border border-green-200' 
-                                    : 'bg-blue-100 text-blue-700 border border-blue-200'
-                            }`}>
-                                {ride.paymentMethod === 'cash' ? 'Cash' : 'Paid'}
-                            </span>
                         </div>
                     </div>
 
-                    {/* Safety & Support */}
-                    <div className='grid grid-cols-2 gap-2'>
-                        <button className='flex items-center justify-center gap-2 bg-white border-2 border-gray-200 hover:border-gray-300 active:scale-95 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all'>
-                            <i className="ri-shield-check-line text-lg"></i>
-                            <span className='text-sm'>Safety</span>
-                        </button>
-                        <button className='flex items-center justify-center gap-2 bg-white border-2 border-gray-200 hover:border-gray-300 active:scale-95 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all'>
-                            <i className="ri-customer-service-2-line text-lg"></i>
-                            <span className='text-sm'>Support</span>
-                        </button>
-                    </div>
+
                 </div>
             </div>
         </div>

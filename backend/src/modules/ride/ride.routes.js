@@ -38,4 +38,10 @@ router.post('/end-ride',
     rideController.endRide
 )
 
+router.get('/captain-rides',
+    authMiddleware.authCaptain,
+    rideController.getCaptainRides
+)
+
 module.exports = router;
+

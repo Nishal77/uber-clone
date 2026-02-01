@@ -34,30 +34,33 @@ const CaptainRiding = () => {
 
     if (!ride) {
         return (
-            <div className='h-screen flex items-center justify-center bg-white'>
-                <div className='text-center'>
-                    <p className='text-gray-600 mb-4'>No active ride</p>
-                    <Link to='/captain-home' className='text-blue-600 underline'>Go back to home</Link>
+            <div className='h-screen flex items-center justify-center bg-gray-50'>
+                <div className='text-center bg-white p-10 rounded-2xl border-2 border-gray-200'>
+                    <div className='w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6'>
+                        <i className="ri-car-line text-4xl text-gray-400"></i>
+                    </div>
+                    <p className='text-gray-600 mb-4 text-lg font-medium'>No active ride</p>
+                    <Link to='/captain-home' className='inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors'>
+                        Go to Home
+                    </Link>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className='h-screen flex flex-col bg-white'>
-            {/* Header */}
-            <div className='flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3'>
-                <div className='flex items-center justify-between'>
-                    <div className='flex items-center gap-3'>
+        <div className='h-screen flex flex-col bg-gray-50'>
+            {/* Clean Header */}
+            <div className='flex-shrink-0 bg-white border-b-2 border-gray-200 px-6 py-4 z-10'>
+                <div className='flex items-center justify-between max-w-md mx-auto'>
+                    <div className='flex items-center gap-4'>
                         <img className='h-6' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="Uber" />
-                        <span className='text-gray-400 text-sm'>|</span>
-                        <span className='text-gray-600 text-sm font-medium'>Navigation</span>
+                        <div className='h-5 w-px bg-gray-300'></div>
+                        <span className='text-gray-700 text-sm font-bold tracking-wide uppercase'>Navigation</span>
                     </div>
-                    <div className='flex items-center gap-2'>
-                        <div className='px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700'>
-                            <span className='inline-block w-1.5 h-1.5 rounded-full mr-1.5 bg-blue-500 animate-pulse'></span>
-                            Ride in Progress
-                        </div>
+                    <div className='px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white'>
+                        <span className='inline-block w-2 h-2 rounded-full mr-2 bg-white animate-pulse'></span>
+                        ACTIVE RIDE
                     </div>
                 </div>
             </div>
@@ -66,138 +69,186 @@ const CaptainRiding = () => {
             <div className='flex-1 relative'>
                 <LiveTracking />
                 
-                {/* Navigation Instructions Overlay */}
-                <div className='absolute top-4 left-4 right-4 z-[1000]'>
-                    <div className='bg-white rounded-xl p-4 border border-gray-200'>
-                        <div className='flex items-center gap-3 mb-2'>
-                            <div className='w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center'>
-                                <i className="ri-navigation-line text-blue-600 text-lg"></i>
+                {/* Navigation Card - Flat Design */}
+                <div className='absolute top-6 left-4 right-4 z-[1000]'>
+                    <div className='bg-white rounded-3xl p-6 border-2 border-gray-200 max-w-md mx-auto'>
+                        <div className='flex items-center gap-4 mb-4'>
+                            <div className='w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center'>
+                                <i className="ri-navigation-fill text-white text-2xl"></i>
                             </div>
                             <div className='flex-1'>
-                                <p className='text-xs text-gray-500'>Heading to pickup</p>
-                                <p className='font-bold text-gray-900'>{ride.pickup}</p>
+                                <p className='text-xs text-blue-600 uppercase tracking-wider font-bold mb-1'>Heading to Pickup</p>
+                                <p className='font-bold text-gray-900 text-base line-clamp-1'>{ride.pickup}</p>
                             </div>
                         </div>
-                        <div className='flex items-center gap-2 text-xs text-gray-600'>
-                            <i className="ri-time-line"></i>
-                            <span>5 min</span>
-                            <span>•</span>
-                            <i className="ri-map-pin-line"></i>
-                            <span>2.2 km</span>
+                        <div className='flex items-center gap-4 pt-3 border-t-2 border-gray-100'>
+                            <div className='flex items-center gap-2 text-sm font-medium'>
+                                <div className='w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center'>
+                                    <i className="ri-time-line text-orange-600"></i>
+                                </div>
+                                <span className='font-bold text-gray-900'>5 min</span>
+                            </div>
+                            <div className='h-4 w-px bg-gray-200'></div>
+                            <div className='flex items-center gap-2 text-sm font-medium'>
+                                <div className='w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center'>
+                                    <i className="ri-map-pin-line text-green-600"></i>
+                                </div>
+                                <span className='font-bold text-gray-900'>2.2 km</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Complete Trip Button */}
-                <div className='absolute bottom-4 left-4 right-4 z-[1000]'>
-                    <button 
-                        onClick={() => setFinishRidePanel(true)}
-                        className='w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-colors flex items-center justify-center gap-2'
-                    >
-                        <i className="ri-checkbox-circle-line text-xl"></i>
-                        <span>Complete Trip</span>
-                    </button>
+                {/* Complete Button - Flat Design */}
+                <div className='absolute bottom-6 left-4 right-4 z-[1000]'>
+                    <div className='max-w-md mx-auto'>
+                        <button 
+                            onClick={() => setFinishRidePanel(true)}
+                            className='w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold py-5 rounded-2xl transition-colors flex items-center justify-center gap-3'
+                        >
+                            <i className="ri-checkbox-circle-fill text-2xl"></i>
+                            <span className='text-lg tracking-wide'>Complete Trip</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Bottom Info Panel */}
-            <div className='flex-shrink-0 bg-white border-t border-gray-200 px-4 py-4'>
-                <div className='max-w-md mx-auto'>
-                    {/* Rider Info */}
-                    <div className='bg-gray-50 rounded-xl p-4 border border-gray-100 mb-3'>
-                        <div className='flex items-center gap-3 mb-3'>
-                            <img 
-                                className='w-12 h-12 rounded-full object-cover' 
-                                src="https://i.pinimg.com/236x/af/26/28/af26280b0ca305be47df0b799ed1b12b.jpg" 
-                                alt="Rider" 
-                            />
+            {/* Bottom Panel - Clean Design */}
+            <div className='flex-shrink-0 bg-white border-t-2 border-gray-200 px-4 py-6'>
+                <div className='max-w-md mx-auto space-y-4'>
+                    {/* Rider Card - Flat */}
+                    <div className='bg-gray-50 rounded-3xl p-5 border-2 border-gray-200'>
+                        <div className='flex items-center gap-4 mb-5'>
+                            <div className='relative'>
+                                <img 
+                                    className='w-16 h-16 rounded-2xl object-cover border-4 border-white' 
+                                    src="https://i.pinimg.com/236x/af/26/28/af26280b0ca305be47df0b799ed1b12b.jpg" 
+                                    alt="Rider" 
+                                />
+                                <div className='absolute -bottom-1 -right-1 w-6 h-6 bg-green-600 rounded-lg flex items-center justify-center'>
+                                    <i className="ri-shield-check-fill text-white text-xs"></i>
+                                </div>
+                            </div>
                             <div className='flex-1'>
-                                <h3 className='font-bold text-gray-900'>
+                                <h3 className='font-bold text-gray-900 text-lg mb-1'>
                                     {ride.user?.fullname?.firstname} {ride.user?.fullname?.lastname}
                                 </h3>
-                                <div className='flex items-center gap-1 text-xs text-gray-600'>
-                                    <i className="ri-star-fill text-yellow-500"></i>
-                                    <span>4.9</span>
+                                <div className='flex items-center gap-2'>
+                                    <div className='flex items-center gap-1 px-2 py-1 bg-orange-50 rounded-lg border border-orange-200'>
+                                        <i className="ri-star-fill text-orange-500 text-sm"></i>
+                                        <span className='text-sm font-bold text-orange-900'>4.9</span>
+                                    </div>
+                                    <span className='text-xs text-gray-500'>• Verified</span>
                                 </div>
                             </div>
                             <a 
                                 href={`tel:${ride.user?.phone || ''}`}
-                                className='w-10 h-10 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center text-white transition-colors'
+                                className='w-14 h-14 bg-green-600 hover:bg-green-700 active:bg-green-800 rounded-2xl flex items-center justify-center text-white transition-colors'
                             >
-                                <i className="ri-phone-line text-lg"></i>
+                                <i className="ri-phone-fill text-xl"></i>
                             </a>
                         </div>
 
-                        {/* Trip Route */}
-                        <div className='space-y-2'>
+                        {/* Route Display - Clean */}
+                        <div className='bg-white rounded-2xl p-4 space-y-4 border-2 border-gray-200'>
                             <div className='flex items-start gap-3'>
-                                <div className='w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5'>
-                                    <i className="ri-map-pin-user-fill text-green-600 text-sm"></i>
+                                <div className='flex flex-col items-center gap-2 pt-1'>
+                                    <div className='w-4 h-4 bg-green-600 rounded-full'></div>
+                                    <div className='w-0.5 h-8 bg-gray-300'></div>
+                                    <div className='w-4 h-4 bg-orange-500 rounded-full'></div>
                                 </div>
-                                <div className='flex-1'>
-                                    <p className='text-xs text-gray-500'>Pickup</p>
-                                    <p className='text-sm font-medium text-gray-900'>{ride.pickup}</p>
-                                </div>
-                            </div>
-                            <div className='flex items-start gap-3'>
-                                <div className='w-6 h-6 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5'>
-                                    <i className="ri-map-pin-2-fill text-red-600 text-sm"></i>
-                                </div>
-                                <div className='flex-1'>
-                                    <p className='text-xs text-gray-500'>Destination</p>
-                                    <p className='text-sm font-medium text-gray-900'>{ride.destination}</p>
+                                <div className='flex-1 space-y-5'>
+                                    <div>
+                                        <p className='text-xs text-green-600 font-bold mb-1 uppercase tracking-wider'>Pickup Location</p>
+                                        <p className='text-sm font-semibold text-gray-900 line-clamp-2'>{ride.pickup}</p>
+                                    </div>
+                                    <div>
+                                        <p className='text-xs text-orange-600 font-bold mb-1 uppercase tracking-wider'>Drop Location</p>
+                                        <p className='text-sm font-semibold text-gray-900 line-clamp-2'>{ride.destination}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Fare Info */}
-                    <div className='flex items-center justify-between bg-green-50 rounded-xl p-3 border border-green-100'>
-                        <div className='flex items-center gap-2'>
-                            <i className="ri-money-rupee-circle-fill text-green-600 text-xl"></i>
-                            <div>
-                                <p className='text-xs text-gray-600'>Trip Fare</p>
-                                <p className='text-lg font-bold text-gray-900'>₹{ride.fare}</p>
+                    {/* Fare Display - Simple & Clean */}
+                    <div className='bg-blue-600 rounded-3xl p-6 border-2 border-blue-700'>
+                        <div className='flex items-center justify-between'>
+                            <div className='flex items-center gap-4'>
+                                <div className='w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center'>
+                                    <i className="ri-money-rupee-circle-fill text-white text-2xl"></i>
+                                </div>
+                                <div>
+                                    <p className='text-xs text-blue-200 font-bold uppercase tracking-wider mb-1'>Trip Earnings</p>
+                                    <p className='text-3xl font-bold text-white'>₹{ride.fare}</p>
+                                </div>
                             </div>
-                        </div>
-                        <div className='px-3 py-1 bg-white rounded-lg border border-green-200'>
-                            <p className='text-xs text-gray-600'>Cash</p>
+                            <div className='px-4 py-2 bg-white rounded-xl border-2 border-blue-700'>
+                                <p className='text-sm text-blue-600 font-bold'>
+                                    {ride.paymentMethod === 'cash' ? 'Cash' : 'Online'}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Finish Ride Confirmation Panel */}
-            <div className={`fixed w-full z-[9999] bottom-0 bg-white px-5 py-8 rounded-t-2xl border-t border-gray-200 transition-transform duration-300 ${finishRidePanel ? 'translate-y-0' : 'translate-y-full'}`}>
+            {/* Confirmation Modal - Flat & Clean */}
+            <div className={`fixed w-full z-[9999] bottom-0 bg-white px-6 py-8 rounded-t-3xl border-t-2 border-gray-200 transition-transform duration-500 ${finishRidePanel ? 'translate-y-0' : 'translate-y-full'}`}>
                 <div className='max-w-md mx-auto'>
-                    <h3 className='text-2xl font-bold mb-4 text-center'>Complete This Trip?</h3>
-                    <p className='text-center text-gray-600 mb-6'>Make sure you've reached the destination</p>
+                    {/* Modal Handle */}
+                    <div className='w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-8'></div>
                     
-                    <div className='bg-gray-50 rounded-xl p-4 mb-6'>
-                        <div className='flex justify-between items-center mb-2'>
-                            <span className='text-gray-600'>Trip Fare:</span>
-                            <span className='text-xl font-bold text-gray-900'>₹{ride.fare}</span>
+                    <div className='text-center mb-8'>
+                        <div className='w-20 h-20 bg-green-100 rounded-3xl flex items-center justify-center mx-auto mb-4 border-2 border-green-200'>
+                            <i className="ri-checkbox-circle-line text-4xl text-green-600"></i>
+                        </div>
+                        <h3 className='text-2xl font-bold mb-2 text-gray-900'>Complete This Trip?</h3>
+                        <p className='text-gray-600'>Confirm that you've reached the destination</p>
+                    </div>
+                    
+                    <div className='bg-gray-50 rounded-2xl p-6 mb-6 border-2 border-gray-200'>
+                        <div className='flex justify-between items-center mb-4 pb-4 border-b-2 border-gray-200'>
+                            <span className='text-gray-600 font-medium'>Trip Fare</span>
+                            <span className='text-2xl font-bold text-gray-900'>₹{ride.fare}</span>
                         </div>
                         <div className='flex justify-between items-center'>
-                            <span className='text-gray-600'>Payment:</span>
-                            <span className='text-sm font-medium text-gray-900'>Cash</span>
+                            <span className='text-gray-600 font-medium'>Payment Method</span>
+                            <div className='flex items-center gap-2'>
+                                <div className='w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center border border-green-200'>
+                                    <i className="ri-money-rupee-circle-fill text-green-600"></i>
+                                </div>
+                                <span className='font-bold text-gray-900'>
+                                    {ride.paymentMethod === 'cash' ? 'Cash' : 'Online'}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    <button 
-                        onClick={finishRide}
-                        className='w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl transition-colors mb-3'
-                    >
-                        Confirm & Complete Trip
-                    </button>
-                    <button 
-                        onClick={() => setFinishRidePanel(false)}
-                        className='w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition-colors'
-                    >
-                        Cancel
-                    </button>
+                    <div className='space-y-3'>
+                        <button 
+                            onClick={finishRide}
+                            className='w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold py-5 rounded-2xl transition-colors'
+                        >
+                            Confirm & Complete Trip
+                        </button>
+                        <button 
+                            onClick={() => setFinishRidePanel(false)}
+                            className='w-full bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-700 font-bold py-4 rounded-2xl transition-colors'
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            {/* Overlay when modal is open */}
+            {finishRidePanel && (
+                <div 
+                    className='fixed inset-0 bg-black/40 z-[9998]'
+                    onClick={() => setFinishRidePanel(false)}
+                ></div>
+            )}
         </div>
     )
 }

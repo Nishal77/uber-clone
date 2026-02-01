@@ -14,6 +14,8 @@ const CaptainHome = () => {
     const [ ride, setRide ] = useState(null)
     const [socketConnected, setSocketConnected] = useState(false)
     const [rideCount, setRideCount] = useState(0) // Track number of rides received
+    const [recentRides, setRecentRides] = useState([]) // Recent completed rides
+    const [loadingRides, setLoadingRides] = useState(false)
 
     const { socket } = useContext(SocketContext)
     const { captain, setCaptain } = useContext(CaptainDataContext)
@@ -127,6 +129,35 @@ const CaptainHome = () => {
         }
     }, [captain?._id, socket, socketConnected])
 
+    // Fetch recent rides
+    useEffect(() => {
+        if (!captain) return
+
+        const fetchRecentRides = async () => {
+            setLoadingRides(true)
+            try {
+                const response = await axios.get(
+                    `${import.meta.env.VITE_BASE_URL}/rides/captain-rides?limit=3`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }
+                )
+                
+                if (response.data.success) {
+                    setRecentRides(response.data.rides)
+                }
+            } catch (err) {
+                console.error('Error fetching recent rides:', err)
+            } finally {
+                setLoadingRides(false)
+            }
+        }
+
+        fetchRecentRides()
+    }, [captain])
+
     async function confirmRide() {
         try {
             console.log('📝 Confirming ride:', ride._id)
@@ -187,27 +218,27 @@ const CaptainHome = () => {
     const isOnline = captain.status === 'active'
 
     return (
-        <div className='h-screen flex flex-col bg-white'>
-            {/* Header */}
-            <div className='flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3'>
-                <div className='flex items-center justify-between'>
-                    <div className='flex items-center gap-3'>
+        <div className='h-screen flex flex-col bg-gray-50'>
+            {/* Clean Header */}
+            <div className='flex-shrink-0 bg-white border-b-2 border-gray-200 px-6 py-4'>
+                <div className='flex items-center justify-between max-w-md mx-auto'>
+                    <div className='flex items-center gap-4'>
                         <img className='h-6' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="Uber" />
-                        <span className='text-gray-400 text-sm'>|</span>
-                        <span className='text-gray-600 text-sm font-medium'>Driver</span>
+                        <div className='h-5 w-px bg-gray-300'></div>
+                        <span className='text-gray-700 text-sm font-bold uppercase tracking-wide'>Driver</span>
                         {rideCount > 0 && (
-                            <span className='px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full'>
-                                {rideCount} request{rideCount > 1 ? 's' : ''}
+                            <span className='px-2.5 py-1 bg-blue-600 text-white text-xs rounded-lg font-bold'>
+                                {rideCount}
                             </span>
                         )}
                     </div>
-                    <div className='flex items-center gap-2'>
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${isOnline ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                            <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+                    <div className='flex items-center gap-3'>
+                        <div className={`px-4 py-2 rounded-xl text-xs font-bold border-2 ${isOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                            <span className={`inline-block w-2 h-2 rounded-full mr-2 ${isOnline ? 'bg-green-600' : 'bg-gray-400'} animate-pulse`}></span>
                             {isOnline ? 'Online' : 'Offline'}
                         </div>
-                        <Link to='/captain-logout' className='h-8 w-8 bg-gray-50 hover:bg-gray-100 flex items-center justify-center rounded-full'>
-                            <i className="ri-logout-box-r-line text-gray-700"></i>
+                        <Link to='/captain-logout' className='h-10 w-10 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-center rounded-xl border-2 border-gray-200 transition-colors'>
+                            <i className="ri-logout-box-r-line text-gray-700 text-lg"></i>
                         </Link>
                     </div>
                 </div>
@@ -217,105 +248,147 @@ const CaptainHome = () => {
             <div className='flex-1 relative'>
                 <LiveTracking />
                 
-                {/* Debug Panel */}
-                <div className='absolute top-4 right-4 z-[1000] bg-black/90 text-white text-xs p-3 rounded-lg space-y-1 max-w-[200px]'>
-                    <p className='font-bold mb-2'>🔧 Debug:</p>
-                    <p>Socket: {socket?.connected ? '✅' : '❌'}</p>
-                    <p>Captain: {captain?.status}</p>
-                    <p>Listener: {socketConnected ? '✅' : '⏳'}</p>
-                    <p>Rides: {rideCount}</p>
-                    <p className='text-yellow-300 mt-2 pt-2 border-t border-gray-600 text-[10px]'>
-                        {isOnline ? 'Waiting for rides...' : 'Go online first'}
-                    </p>
-                </div>
+                {/* Debug Panel - Hidden in Production */}
+                {process.env.NODE_ENV === 'development' && (
+                    <div className='absolute top-4 right-4 z-[1000] bg-gray-900 text-white text-xs p-3 rounded-2xl border-2 border-gray-700 space-y-1 max-w-[200px]'>
+                        <p className='font-bold mb-2'>🔧 Debug</p>
+                        <p>Socket: {socket?.connected ? '✅' : '❌'}</p>
+                        <p>Captain: {captain?.status}</p>
+                        <p>Listener: {socketConnected ? '✅' : '⏳'}</p>
+                        <p>Rides: {rideCount}</p>
+                        <p className='text-yellow-300 mt-2 pt-2 border-t border-gray-700 text-[10px]'>
+                            {isOnline ? 'Waiting for rides...' : 'Go online first'}
+                        </p>
+                    </div>
+                )}
 
-                {/* Status Badge Overlay */}
+                {/* New Ride Alert */}
                 {ride && ridePopupPanel && (
-                    <div className='absolute top-20 left-1/2 transform -translate-x-1/2 z-[1000] bg-green-500 text-white px-6 py-3 rounded-full font-bold animate-bounce'>
-                        🚗 New Ride Request!
+                    <div className='absolute top-6 left-4 right-4 z-[1000] max-w-md mx-auto'>
+                        <div className='bg-green-600 text-white px-6 py-4 rounded-2xl font-bold text-center border-2 border-green-700 animate-pulse'>
+                            <i className="ri-notification-3-line text-2xl mr-2"></i>
+                            New Ride Request!
+                        </div>
                     </div>
                 )}
             </div>
 
-            {/* Bottom Panel - Stats & Actions */}
-            <div className='flex-shrink-0 bg-white border-t border-gray-200 px-4 py-5'>
+            {/* Bottom Panel - Clean Stats */}
+            <div className='flex-shrink-0 bg-white border-t-2 border-gray-200 px-4 py-6'>
                 <div className='max-w-md mx-auto space-y-4'>
-                    {/* Driver Info */}
-                    <div className='flex items-center justify-between'>
-                        <div className='flex items-center gap-3'>
-                            <div className='w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold'>
+                    {/* Driver Profile */}
+                    <div className='flex items-center justify-between bg-gray-50 rounded-3xl p-4 border-2 border-gray-200'>
+                        <div className='flex items-center gap-4'>
+                            <div className='w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl border-2 border-blue-700'>
                                 {captain.fullname?.firstname?.[0] || 'C'}
                             </div>
                             <div>
-                                <h3 className='font-bold text-gray-900'>{captain.fullname?.firstname} {captain.fullname?.lastname}</h3>
-                                <p className='text-xs text-gray-500'>{captain.vehicle?.vehicleType} • {captain.vehicle?.plate}</p>
+                                <h3 className='font-bold text-gray-900 text-lg'>{captain.fullname?.firstname} {captain.fullname?.lastname}</h3>
+                                <p className='text-sm text-gray-600'>{captain.vehicle?.vehicleType} • {captain.vehicle?.plate}</p>
                             </div>
                         </div>
                         <button 
                             onClick={toggleAvailability}
-                            className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors ${
+                            className={`px-6 py-3 rounded-xl font-bold text-sm transition-colors border-2 ${
                                 isOnline 
-                                    ? 'bg-red-500 hover:bg-red-600 text-white' 
-                                    : 'bg-black hover:bg-gray-800 text-white'
+                                    ? 'bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border-red-700' 
+                                    : 'bg-green-600 hover:bg-green-700 active:bg-green-800 text-white border-green-700'
                             }`}
                         >
                             {isOnline ? 'Go Offline' : 'Go Online'}
                         </button>
                     </div>
 
-                    {/* Stats Grid */}
+                    {/* Stats Grid - Flat Design */}
                     <div className='grid grid-cols-3 gap-3'>
-                        <div className='bg-gray-50 rounded-xl p-3 text-center border border-gray-100'>
-                            <div className='w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-lg mx-auto mb-2 flex items-center justify-center'>
-                                <i className="ri-money-rupee-circle-line text-white text-base"></i>
+                        <div className='bg-white rounded-2xl p-4 text-center border-2 border-gray-200'>
+                            <div className='w-10 h-10 bg-green-100 rounded-xl mx-auto mb-3 flex items-center justify-center border border-green-200'>
+                                <i className="ri-money-rupee-circle-line text-green-600 text-xl"></i>
                             </div>
-                            <p className='text-xl font-bold text-gray-900'>₹{captain.earnings || '0'}</p>
-                            <p className='text-xs text-gray-500 mt-0.5'>Earnings</p>
+                            <p className='text-2xl font-bold text-gray-900'>₹{captain.earnings || '0'}</p>
+                            <p className='text-xs text-gray-500 mt-1 font-medium uppercase tracking-wider'>Earnings</p>
                         </div>
 
-                        <div className='bg-gray-50 rounded-xl p-3 text-center border border-gray-100'>
-                            <div className='w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg mx-auto mb-2 flex items-center justify-center'>
-                                <i className="ri-steering-2-line text-white text-base"></i>
+                        <div className='bg-white rounded-2xl p-4 text-center border-2 border-gray-200'>
+                            <div className='w-10 h-10 bg-blue-100 rounded-xl mx-auto mb-3 flex items-center justify-center border border-blue-200'>
+                                <i className="ri-steering-2-line text-blue-600 text-xl"></i>
                             </div>
-                            <p className='text-xl font-bold text-gray-900'>{captain.totalRides || '0'}</p>
-                            <p className='text-xs text-gray-500 mt-0.5'>Trips</p>
+                            <p className='text-2xl font-bold text-gray-900'>{captain.totalRides || '0'}</p>
+                            <p className='text-xs text-gray-500 mt-1 font-medium uppercase tracking-wider'>Trips</p>
                         </div>
 
-                        <div className='bg-gray-50 rounded-xl p-3 text-center border border-gray-100'>
-                            <div className='w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg mx-auto mb-2 flex items-center justify-center'>
-                                <i className="ri-star-fill text-white text-base"></i>
+                        <div className='bg-white rounded-2xl p-4 text-center border-2 border-gray-200'>
+                            <div className='w-10 h-10 bg-orange-100 rounded-xl mx-auto mb-3 flex items-center justify-center border border-orange-200'>
+                                <i className="ri-star-fill text-orange-500 text-xl"></i>
                             </div>
-                            <p className='text-xl font-bold text-gray-900'>{captain.rating || '5.0'}</p>
-                            <p className='text-xs text-gray-500 mt-0.5'>Rating</p>
+                            <p className='text-2xl font-bold text-gray-900'>{captain.rating || '5.0'}</p>
+                            <p className='text-xs text-gray-500 mt-1 font-medium uppercase tracking-wider'>Rating</p>
                         </div>
                     </div>
 
-                    {/* Tips Section */}
-                    <div className='grid grid-cols-2 gap-2'>
-                        <div className='bg-blue-50 rounded-lg p-3 border border-blue-100'>
-                            <div className='flex items-start gap-2'>
-                                <i className="ri-time-line text-blue-600 text-lg flex-shrink-0"></i>
-                                <div>
-                                    <p className='font-semibold text-gray-900 text-xs'>Peak Hours</p>
-                                    <p className='text-xs text-gray-600 mt-0.5'>8-10 AM, 5-9 PM</p>
-                                </div>
-                            </div>
+                    {/* Recent Rides - Dynamic */}
+                    <div className='bg-white rounded-3xl p-5 border-2 border-gray-200'>
+                        <div className='flex items-center justify-between mb-4'>
+                            <h3 className='font-bold text-gray-900 text-lg'>Recent Rides</h3>
+                            <i className="ri-history-line text-gray-400 text-xl"></i>
                         </div>
-                        <div className='bg-purple-50 rounded-lg p-3 border border-purple-100'>
-                            <div className='flex items-start gap-2'>
-                                <i className="ri-gift-line text-purple-600 text-lg flex-shrink-0"></i>
-                                <div>
-                                    <p className='font-semibold text-gray-900 text-xs'>Bonus Today</p>
-                                    <p className='text-xs text-gray-600 mt-0.5'>5 trips = ₹100</p>
-                                </div>
+                        
+                        {loadingRides ? (
+                            <div className='py-8 text-center'>
+                                <div className='inline-block animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full'></div>
+                                <p className='text-sm text-gray-500 mt-2'>Loading rides...</p>
                             </div>
-                        </div>
+                        ) : recentRides.length > 0 ? (
+                            <div className='space-y-3'>
+                                {recentRides.map((rideItem, index) => (
+                                    <div key={rideItem._id} className='bg-gray-50 rounded-2xl p-4 border border-gray-200'>
+                                        <div className='flex items-start gap-3 mb-3'>
+                                            <div className='flex flex-col items-center gap-1.5 pt-1'>
+                                                <div className='w-2.5 h-2.5 bg-green-600 rounded-full'></div>
+                                                <div className='w-0.5 h-6 bg-gray-300'></div>
+                                                <div className='w-2.5 h-2.5 bg-orange-500 rounded-full'></div>
+                                            </div>
+                                            <div className='flex-1 min-w-0'>
+                                                <p className='text-xs text-gray-500 mb-1'>
+                                                    {new Date(rideItem.createdAt).toLocaleDateString('en-IN', { 
+                                                        month: 'short', 
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </p>
+                                                <p className='text-sm font-semibold text-gray-900 truncate mb-1'>
+                                                    {rideItem.pickup.split(',')[0]}
+                                                </p>
+                                                <p className='text-sm font-semibold text-gray-900 truncate'>
+                                                    {rideItem.destination.split(',')[0]}
+                                                </p>
+                                            </div>
+                                            <div className='text-right flex-shrink-0'>
+                                                <p className='text-lg font-bold text-green-600'>₹{rideItem.fare}</p>
+                                                <p className='text-xs text-gray-500 mt-1'>
+                                                    {rideItem.paymentMethod === 'cash' ? 'Cash' : 'Online'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className='py-8 text-center'>
+                                <div className='w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3'>
+                                    <i className="ri-car-line text-gray-400 text-3xl"></i>
+                                </div>
+                                <p className='text-sm text-gray-500'>No completed rides yet</p>
+                                <p className='text-xs text-gray-400 mt-1'>Start accepting rides to see your history</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Ride Popups */}
-            <div className={`fixed w-full z-[9999] bottom-0 bg-white px-5 py-8 rounded-t-2xl border-t border-gray-200 transition-transform duration-300 ${ridePopupPanel ? 'translate-y-0' : 'translate-y-full'}`}>
+            <div className={`fixed w-full z-[9999] bottom-0 bg-white px-5 py-8 rounded-t-3xl border-t-2 border-gray-200 transition-transform duration-300 ${ridePopupPanel ? 'translate-y-0' : 'translate-y-full'}`}>
                 <RidePopUp
                     ride={ride}
                     setRidePopupPanel={setRidePopupPanel}
@@ -323,13 +396,18 @@ const CaptainHome = () => {
                     confirmRide={confirmRide}
                 />
             </div>
-            <div className={`fixed w-full z-[9999] bottom-0 bg-white px-5 py-8 rounded-t-2xl h-screen transition-transform duration-300 ${confirmRidePopupPanel ? 'translate-y-0' : 'translate-y-full'}`}>
+            <div className={`fixed w-full z-[9999] bottom-0 bg-white px-5 py-8 rounded-t-3xl h-screen transition-transform duration-300 ${confirmRidePopupPanel ? 'translate-y-0' : 'translate-y-full'}`}>
                 <ConfirmRidePopUp
                     ride={ride}
                     setConfirmRidePopupPanel={setConfirmRidePopupPanel}
                     setRidePopupPanel={setRidePopupPanel} 
                 />
             </div>
+
+            {/* Overlay when popup is open */}
+            {(ridePopupPanel || confirmRidePopupPanel) && (
+                <div className='fixed inset-0 bg-black/40 z-[9998]'></div>
+            )}
         </div>
     )
 }

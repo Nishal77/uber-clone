@@ -146,3 +146,31 @@ module.exports.endRide = async (req, res) => {
         return res.status(500).json({ message: err.message });
     }
 }
+
+module.exports.getCaptainRides = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 5; // Default to 5 recent rides
+        
+        const rides = await rideModel
+            .find({ 
+                captain: req.captain._id,
+                status: 'completed'
+            })
+            .populate('user', 'fullname phone')
+            .sort({ createdAt: -1 }) // Most recent first
+            .limit(limit)
+            .select('pickup destination fare paymentMethod createdAt status');
+
+        return res.status(200).json({
+            success: true,
+            rides: rides
+        });
+    } catch (err) {
+        console.error('Error fetching captain rides:', err);
+        return res.status(500).json({ 
+            success: false,
+            message: err.message 
+        });
+    }
+}
+

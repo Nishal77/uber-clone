@@ -7,8 +7,11 @@ import CaptainLogin from './modules/captain/pages/CaptainLogin'
 import CaptainSignup from './modules/captain/pages/CaptainSignup'
 import CaptainLogout from './modules/captain/pages/CaptainLogout'
 import Home from './modules/user/pages/Home'
+import Riding from './modules/user/pages/Riding'
 import CaptainHome from './modules/captain/pages/CaptainHome'
 import CaptainRiding from './modules/captain/pages/CaptainRiding'
+import AdminLogin from './modules/admin/pages/AdminLogin'
+import AdminDashboard from './modules/admin/pages/AdminDashboard'
 import UserProtectWrapper from './modules/user/pages/UserProtectWrapper'
 import CaptainProtectWrapper from './modules/captain/pages/CaptainProtectWrapper'
 
@@ -22,9 +25,16 @@ const App = () => {
         <Route path='/captain-login' element={<CaptainLogin />} />
         <Route path='/captain-signup' element={<CaptainSignup />} />
         <Route path='/captain-logout' element={<CaptainLogout />} />
+        <Route path='/admin/login' element={<AdminLogin />} />
+        <Route path='/admin/dashboard' element={<AdminDashboard />} />
         <Route path='/home' element={
           <UserProtectWrapper>
             <Home />
+          </UserProtectWrapper>
+        } />
+        <Route path='/riding' element={
+          <UserProtectWrapper>
+            <Riding />
           </UserProtectWrapper>
         } />
         <Route path='/captain-home' element={

@@ -36,19 +36,37 @@ const Home = () => {
     const { user } = useContext(UserDataContext)
 
     useEffect(() => {
+        if (!user || !socket) return
+
+        console.log('🚀 User joining socket room:', user._id)
         socket.emit("join", { userType: "user", userId: user._id })
-    }, [ user ])
 
-    socket.on('ride-confirmed', ride => {
-        setVehicleFound(false)
-        setWaitingForDriver(true)
-        setRide(ride)
-    })
+        // Listen for ride confirmed (captain accepted)
+        const handleRideConfirmed = (ride) => {
+            console.log('✅ Ride confirmed by captain:', ride)
+            setVehicleFound(false)
+            setWaitingForDriver(true)
+            setRide(ride)
+        }
 
-    socket.on('ride-started', ride => {
-        setWaitingForDriver(false)
-        navigate('/riding', { state: { ride } }) 
-    })
+        // Listen for ride started (captain entered OTP)
+        const handleRideStarted = (ride) => {
+            console.log('🚗 Ride started:', ride)
+            setWaitingForDriver(false)
+            navigate('/riding', { state: { ride } })
+        }
+
+        socket.on('ride-confirmed', handleRideConfirmed)
+        socket.on('ride-started', handleRideStarted)
+
+        console.log('👂 User listening for ride updates')
+
+        return () => {
+            console.log('🧹 Cleaning up user socket listeners')
+            socket.off('ride-confirmed', handleRideConfirmed)
+            socket.off('ride-started', handleRideStarted)
+        }
+    }, [user, socket, navigate])
 
 
     const panelRef = useRef(null)
@@ -118,22 +136,124 @@ const Home = () => {
         }
     }
 
-    const createRide = async () => {
+    const createRide = async (paymentMethod = 'cash') => {
         try {
             const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
                 pickup,
                 destination,
-                vehicleType
+                vehicleType,
+                paymentMethod
             }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
             })
-            setRide(response.data)
-            setVehicleFound(true)
-            setConfirmRidePanel(false)
+            
+            const createdRide = response.data
+            setRide(createdRide)
+
+            // If online payment, initiate Razorpay
+            if (paymentMethod === 'online') {
+                await initiateRazorpayPayment(createdRide)
+            } else {
+                // For cash payment, proceed normally
+                setVehicleFound(true)
+                setConfirmRidePanel(false)
+            }
         } catch (error) {
             console.error('Error creating ride:', error)
+            alert('Failed to create ride. Please try again.')
+        }
+    }
+
+    const initiateRazorpayPayment = async (ride) => {
+        try {
+            console.log('Initiating Razorpay payment for ride:', ride._id);
+
+            // Create Razorpay order
+            const orderResponse = await axios.post(
+                `${import.meta.env.VITE_BASE_URL}/payment/create-order`,
+                {
+                    rideId: ride._id,
+                    amount: ride.fare
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            )
+
+            console.log('Order response:', orderResponse.data);
+
+            const { order, key } = orderResponse.data
+
+            // Check if Razorpay is loaded
+            if (!window.Razorpay) {
+                console.error('Razorpay script not loaded');
+                alert('Payment system not loaded. Please refresh the page.');
+                return;
+            }
+
+            // Razorpay options
+            const options = {
+                key: key,
+                amount: order.amount,
+                currency: order.currency,
+                name: 'Uber Clone',
+                description: `Ride from ${pickup.split(',')[0]} to ${destination.split(',')[0]}`,
+                order_id: order.id,
+                handler: async function (response) {
+                    console.log('Payment successful, verifying...', response);
+                    // Verify payment
+                    try {
+                        const verifyResponse = await axios.post(
+                                `${import.meta.env.VITE_BASE_URL}/payment/verify-payment`,
+                                {
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    rideId: ride._id
+                                },
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                                    }
+                                }
+                        )
+
+                        console.log('✅ Payment verified:', verifyResponse.data);
+                        setVehicleFound(true)
+                        setConfirmRidePanel(false)
+                    } catch (error) {
+                        console.error('Payment verification failed:', error);
+                        alert('Payment verification failed. Please contact support.')
+                    }
+                },
+                    prefill: {
+                        name: user.fullname.firstname + ' ' + user.fullname.lastname,
+                        email: user.email,
+                        contact: user.phone || '9999999999'
+                    },
+                    theme: {
+                        color: '#10B981'
+                    },
+                modal: {
+                    ondismiss: function() {
+                        console.log('Payment cancelled by user');
+                        alert('Payment cancelled. You can try again.')
+                    }
+                }
+            }
+
+            console.log('Opening Razorpay checkout...');
+            const paymentObject = new window.Razorpay(options)
+            paymentObject.open()
+
+        } catch (error) {
+            console.error('Error initiating payment:', error);
+            console.error('Error details:', error.response?.data);
+            alert(`Failed to initiate payment: ${error.response?.data?.message || error.message}`)
         }
     }
 
@@ -295,7 +415,14 @@ const Home = () => {
                 />
             </div>
             <div ref={waitingForDriverRef} className='fixed w-full z-40 bottom-0  bg-white px-3 py-6 pt-12 rounded-t-3xl shadow-2xl h-screen'>
-                <WaitingForDriver setWaitingForDriver={setWaitingForDriver} ride={ride} />
+                <WaitingForDriver 
+                    setWaitingForDriver={setWaitingForDriver} 
+                    ride={ride}
+                    pickup={pickup}
+                    destination={destination}
+                    fare={fare}
+                    vehicleType={vehicleType}
+                />
             </div>
         </div>
     )

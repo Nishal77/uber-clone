@@ -31,7 +31,7 @@ function getOtp(num) {
 }
 
 module.exports.createRide = async ({
-    user, pickup, destination, vehicleType
+    user, pickup, destination, vehicleType, paymentMethod
 }) => {
     if (!user || !pickup || !destination || !vehicleType) {
         throw new Error('All fields are required');
@@ -44,7 +44,8 @@ module.exports.createRide = async ({
         pickup,
         destination,
         otp: getOtp(6),
-        fare: fare[ vehicleType ]
+        fare: fare[ vehicleType ],
+        paymentMethod: paymentMethod || 'cash'
     })
 
     return ride;
@@ -100,6 +101,43 @@ module.exports.startRide = async ({ rideId, otp, captain }) => {
     }, {
         status: 'ongoing'
     })
+
+    return ride;
+}
+
+module.exports.endRide = async ({ rideId, captain }) => {
+    if (!rideId) {
+        throw new Error('Ride id is required');
+    }
+
+    const ride = await rideModel.findOne({
+        _id: rideId,
+        captain: captain._id
+    }).populate('user').populate('captain');
+
+    if (!ride) {
+        throw new Error('Ride not found');
+    }
+
+    if (ride.status !== 'ongoing') {
+        throw new Error('Ride is not ongoing');
+    }
+
+    // Update ride status to completed
+    await rideModel.findOneAndUpdate({
+        _id: rideId
+    }, {
+        status: 'completed'
+    });
+
+    // Update captain's earnings
+    const captainModel = require('../captain/captain.model');
+    await captainModel.findByIdAndUpdate(captain._id, {
+        $inc: { 
+            earnings: ride.fare,
+            totalRides: 1
+        }
+    });
 
     return ride;
 }

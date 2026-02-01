@@ -12,6 +12,8 @@ const userRoutes = require('./modules/user/user.routes');
 const captainRoutes = require('./modules/captain/captain.routes');
 const mapsRoutes = require('./modules/maps/maps.routes');
 const rideRoutes = require('./modules/ride/ride.routes');
+const paymentRoutes = require('./modules/payment/payment.routes');
+const adminRoutes = require('./modules/admin/admin.routes');
 
 app.use(cors());
 app.use(express.json());
@@ -26,5 +28,7 @@ app.use('/users', userRoutes);
 app.use('/captains', captainRoutes);
 app.use('/maps', mapsRoutes);
 app.use('/rides', rideRoutes);
+app.use('/payment', paymentRoutes);
+app.use('/admin', adminRoutes);
 
 module.exports = app;

@@ -138,6 +138,11 @@ const Home = () => {
 
     const createRide = async (paymentMethod = 'cash') => {
         try {
+            console.log('🚗 Creating ride with payment method:', paymentMethod);
+            console.log('📍 Pickup:', pickup);
+            console.log('📍 Destination:', destination);
+            console.log('🚙 Vehicle type:', vehicleType);
+
             const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
                 pickup,
                 destination,
@@ -150,27 +155,48 @@ const Home = () => {
             })
             
             const createdRide = response.data
+            console.log('✅ Ride created:', createdRide);
+            console.log('💰 Ride fare:', createdRide.fare);
             setRide(createdRide)
+
+            // Validate ride data
+            if (!createdRide._id || !createdRide.fare) {
+                throw new Error('Invalid ride data received');
+            }
 
             // If online payment, initiate Razorpay
             if (paymentMethod === 'online') {
+                console.log('💳 Initiating online payment for amount:', createdRide.fare);
                 await initiateRazorpayPayment(createdRide)
             } else {
                 // For cash payment, proceed normally
+                console.log('💵 Cash payment selected, proceeding to find driver');
                 setVehicleFound(true)
                 setConfirmRidePanel(false)
             }
         } catch (error) {
-            console.error('Error creating ride:', error)
-            alert('Failed to create ride. Please try again.')
+            console.error('❌ Error creating ride:', error);
+            console.error('Error details:', error.response?.data);
+            alert(`Failed to create ride: ${error.response?.data?.message || error.message}`)
         }
     }
 
     const initiateRazorpayPayment = async (ride) => {
         try {
             console.log('Initiating Razorpay payment for ride:', ride._id);
+            console.log('Ride fare to be paid:', ride.fare);
+            console.log('Full ride object:', ride);
+
+            // Validate ride data before creating order
+            if (!ride._id) {
+                throw new Error('Ride ID is missing');
+            }
+            if (!ride.fare || ride.fare <= 0) {
+                throw new Error(`Invalid fare amount: ${ride.fare}`);
+            }
 
             // Create Razorpay order
+            console.log('Sending request to create Razorpay order...');
             const orderResponse = await axios.post(
                 `${import.meta.env.VITE_BASE_URL}/payment/create-order`,
                 {

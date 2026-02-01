@@ -25,18 +25,39 @@ module.exports.createOrder = async (req, res) => {
 
         // Validate Razorpay credentials
         if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-            console.error('Razorpay credentials missing!');
+            console.error('❌ Razorpay credentials missing!');
+            console.error('📝 Please create a Razorpay account and get your test API keys');
+            console.error('📖 See: HOW_TO_GET_RAZORPAY_KEYS.md for instructions');
             return res.status(500).json({
                 success: false,
-                message: 'Payment gateway not configured'
+                message: 'Payment gateway not configured. Please contact administrator.',
+                hint: 'Get Razorpay test keys from https://dashboard.razorpay.com/app/keys'
+            });
+        }
+
+        // Check if keys are placeholder values
+        if (process.env.RAZORPAY_KEY_ID === 'your_key_id_here' || 
+            process.env.RAZORPAY_KEY_SECRET === 'your_key_secret_here') {
+            console.error('❌ Razorpay credentials are placeholder values!');
+            console.error('📝 Please replace with actual Razorpay test keys in .env file');
+            console.error('📖 See: HOW_TO_GET_RAZORPAY_KEYS.md for instructions');
+            return res.status(500).json({
+                success: false,
+                message: 'Payment gateway not configured with valid credentials',
+                hint: 'Replace placeholder keys in .env with actual Razorpay test keys'
             });
         }
 
         // Create Razorpay order
+        // Receipt must be <= 40 characters
+        const shortRideId = rideId.toString().slice(-12); // Last 12 chars of ride ID
+        const timestamp = Date.now().toString().slice(-8); // Last 8 digits of timestamp
+        const receipt = `ride_${shortRideId}_${timestamp}`; // Total: 5+12+1+8 = 26 chars
+        
         const options = {
             amount: Math.round(amount * 100), // Razorpay expects amount in paise (integer)
             currency: 'INR',
-            receipt: `ride_${rideId}_${Date.now()}`,
+            receipt: receipt,
             notes: {
                 rideId: rideId,
                 userId: req.user._id.toString()

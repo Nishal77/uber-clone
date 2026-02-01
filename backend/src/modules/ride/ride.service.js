@@ -37,16 +37,28 @@ module.exports.createRide = async ({
         throw new Error('All fields are required');
     }
 
-    const fare = await getFare(pickup, destination);
+    console.log(`📝 Creating ride for vehicle type: ${vehicleType}`);
 
-    const ride = rideModel.create({
+    const fare = await getFare(pickup, destination);
+    console.log(`💰 Calculated fares:`, fare);
+
+    const selectedFare = fare[vehicleType];
+    console.log(`✅ Selected fare for ${vehicleType}: ₹${selectedFare}`);
+
+    if (!selectedFare) {
+        throw new Error(`Invalid vehicle type: ${vehicleType}`);
+    }
+
+    const ride = await rideModel.create({
         user,
         pickup,
         destination,
         otp: getOtp(6),
-        fare: fare[ vehicleType ],
+        fare: selectedFare,
         paymentMethod: paymentMethod || 'cash'
-    })
+    });
+
+    console.log(`✅ Ride created with ID: ${ride._id}, Fare: ₹${ride.fare}, Payment: ${ride.paymentMethod}`);
 
     return ride;
 }

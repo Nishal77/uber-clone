@@ -24,25 +24,18 @@ const CaptainHome = () => {
     // Separate effect for socket setup - runs once when captain is available
     useEffect(() => {
         if (!captain || !socket) {
-            console.log('⚠️ Waiting for captain or socket...')
             return
         }
-
-        console.log('🚀 Setting up socket for captain:', captain._id)
-        console.log('📡 Socket ID:', socket.id)
 
         // Join room
         socket.emit('join', {
             userId: captain._id,
             userType: 'captain'
         })
-        console.log('✅ Sent join event')
         setSocketConnected(true)
 
         // Listen for new rides
         const handleNewRide = (data) => {
-            console.log('🚗🚗🚗 NEW RIDE RECEIVED 🚗🚗🚗')
-            console.log('Ride data:', data)
             setRide(data)
             setRidePopupPanel(true)
             setRideCount(prev => prev + 1)
@@ -57,7 +50,6 @@ const CaptainHome = () => {
         }
 
         socket.on('new-ride', handleNewRide)
-        console.log('👂 Listening for new-ride events...')
 
         // Request notification permission
         if (Notification.permission === 'default') {
@@ -66,7 +58,6 @@ const CaptainHome = () => {
 
         // Cleanup
         return () => {
-            console.log('🧹 Removing new-ride listener')
             socket.off('new-ride', handleNewRide)
         }
     }, [captain?._id, socket])
@@ -86,11 +77,9 @@ const CaptainHome = () => {
                                 lng: position.coords.longitude
                             }
                         }
-                        console.log('📍 Sending location update:', locationData)
                         socket.emit('update-location-captain', locationData)
                     },
                     error => {
-                        console.error('❌ Geolocation error:', error)
                         // Use fallback location (Acchada location from the map)
                         const fallbackLocation = {
                             userId: captain._id,
@@ -99,12 +88,10 @@ const CaptainHome = () => {
                                 lng: 74.759498
                             }
                         }
-                        console.log('📍 Using fallback location (Acchada):', fallbackLocation)
                         socket.emit('update-location-captain', fallbackLocation)
                     }
                 )
             } else {
-                console.error('❌ Geolocation not supported')
                 // Use fallback location
                 const fallbackLocation = {
                     userId: captain._id,
@@ -124,7 +111,6 @@ const CaptainHome = () => {
         const locationInterval = setInterval(updateLocation, 10000)
 
         return () => {
-            console.log('🧹 Clearing location interval')
             clearInterval(locationInterval)
         }
     }, [captain?._id, socket, socketConnected])
@@ -149,7 +135,6 @@ const CaptainHome = () => {
                     setRecentRides(response.data.rides)
                 }
             } catch (err) {
-                console.error('Error fetching recent rides:', err)
             } finally {
                 setLoadingRides(false)
             }
@@ -160,7 +145,6 @@ const CaptainHome = () => {
 
     async function confirmRide() {
         try {
-            console.log('📝 Confirming ride:', ride._id)
             const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`, {
                 rideId: ride._id,
                 captainId: captain._id,
@@ -170,25 +154,20 @@ const CaptainHome = () => {
                 }
             })
 
-            console.log('✅ Ride confirmed:', response.data)
             setRidePopupPanel(false)
             setConfirmRidePopupPanel(true)
         } catch (err) {
-            console.error('❌ Error confirming ride:', err)
             alert('Failed to confirm ride. Please try again.')
         }
     }
 
     async function ignoreRide() {
-        console.log('❌ Ride ignored by captain')
         setRidePopupPanel(false)
         setRide(null)
     }
 
     async function toggleAvailability() {
         try {
-            console.log('🔄 Toggling availability...')
-            
             const response = await axios.patch(
                 `${import.meta.env.VITE_BASE_URL}/captains/toggle-availability`, 
                 {}, 
@@ -199,14 +178,10 @@ const CaptainHome = () => {
                 }
             )
             
-            console.log('✅ Toggle response:', response.data)
-            
             if (response.status === 200) {
                 setCaptain(response.data.captain)
-                console.log('✅ Status updated to:', response.data.captain.status)
             }
         } catch (err) {
-            console.error('❌ Toggle error:', err.response?.data || err.message)
             alert(`Failed to toggle availability. ${err.response?.data?.message || 'Please try again.'}`)
         }
     }
@@ -247,20 +222,6 @@ const CaptainHome = () => {
             {/* Map Container */}
             <div className='flex-1 relative'>
                 <LiveTracking />
-                
-                {/* Debug Panel - Hidden in Production */}
-                {process.env.NODE_ENV === 'development' && (
-                    <div className='absolute top-4 right-4 z-[1000] bg-gray-900 text-white text-xs p-3 rounded-2xl border-2 border-gray-700 space-y-1 max-w-[200px]'>
-                        <p className='font-bold mb-2'>🔧 Debug</p>
-                        <p>Socket: {socket?.connected ? '✅' : '❌'}</p>
-                        <p>Captain: {captain?.status}</p>
-                        <p>Listener: {socketConnected ? '✅' : '⏳'}</p>
-                        <p>Rides: {rideCount}</p>
-                        <p className='text-yellow-300 mt-2 pt-2 border-t border-gray-700 text-[10px]'>
-                            {isOnline ? 'Waiting for rides...' : 'Go online first'}
-                        </p>
-                    </div>
-                )}
 
                 {/* New Ride Alert */}
                 {ride && ridePopupPanel && (

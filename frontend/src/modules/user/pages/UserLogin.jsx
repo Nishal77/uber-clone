@@ -11,8 +11,6 @@ const UserLogin = () => {
   const { user, setUser } = useContext(UserDataContext)
   const navigate = useNavigate()
 
-
-
   const submitHandler = async (e) => {
     e.preventDefault();
 
@@ -21,15 +19,19 @@ const UserLogin = () => {
       password: password
     }
 
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData)
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`, userData)
 
-    if (response.status === 200) {
-      const data = response.data
-      setUser(data.user)
-      localStorage.setItem('token', data.token)
-      navigate('/home')
+      if (response.status === 200) {
+        const data = response.data
+        setUser(data.user)
+        localStorage.setItem('token', data.token)
+        navigate('/home')
+      }
+    } catch (error) {
+       console.error("Login failed", error)
+       alert(error.response?.data?.message || 'Invalid email or password')
     }
-
 
     setEmail('')
     setPassword('')
